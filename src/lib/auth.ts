@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import bcrypt from "bcrypt";
 import db from "@/lib/db";
 import { getSessionUserId } from "@/lib/session";
@@ -29,8 +30,11 @@ export type CurrentUser = {
   };
 };
 
-/** Returns the logged-in user + their own person record, or null if unauthenticated. */
-export async function getCurrentUser(): Promise<CurrentUser | null> {
+/**
+ * Returns the logged-in user + their own person record, or null if unauthenticated.
+ * Wrapped in React's cache() so the layout and page in the same request share one query.
+ */
+export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const userId = await getSessionUserId();
   if (!userId) return null;
 
@@ -68,4 +72,4 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
       notes: row.notes,
     },
   };
-}
+});
